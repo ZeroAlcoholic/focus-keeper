@@ -1,4 +1,9 @@
-# focus_keeper
+# focus-keeper
+
+[![CI](https://github.com/ZeroAlcoholic/focus-keeper/actions/workflows/ci.yml/badge.svg)](https://github.com/ZeroAlcoholic/focus-keeper/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/ZeroAlcoholic/focus-keeper)](https://github.com/ZeroAlcoholic/focus-keeper/releases)
+![Python](https://img.shields.io/badge/python-3.10%2B-blue)
+![Tests](https://img.shields.io/badge/tests-176-brightgreen)
 
 全地端、低延遲的**單人頭肩構圖監測**。即時處理攝影機或影片，在下列情況示警：
 
@@ -9,6 +14,21 @@
 不做人臉辨識、身分比對、全身偵測，也不做任何雲端傳輸。影像預設不落地。
 
 **純 CPU、無 GPU、執行期不連網。** 相依只有 3 個套件，全部可封閉商用。
+
+![預覽疊圖：NORMAL / PRIMARY_LEFT / MULTI_PERSON](assets/overlay.png)
+
+*左：正常。中：主角臉部偵測不到（紅框是最後已知位置）。右：偵測到第二人。
+截圖使用合成臉素材。*
+
+## 執行需求（實測）
+
+| 項目 | 數值 |
+|---|---|
+| 記憶體 | 120–131 MB |
+| CPU | 單執行緒，10 FPS 下工作週期約 4% |
+| pipeline P95 延遲 | 4.15 ms（要求 < 200 ms，餘裕 48 倍） |
+| 判定頻率 | 10.0 FPS |
+| GPU / 網路 | 皆不需要 |
 
 ## 能力界線（使用前必讀）
 
