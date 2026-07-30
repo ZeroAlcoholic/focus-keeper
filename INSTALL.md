@@ -14,6 +14,8 @@ pip install -e .
 
 模型權重已隨倉庫提供（232 KB），**安裝與執行都不需要連網**。
 
+要跑測試的話裝開發相依：`pip install -e ".[dev]"`，然後 `pytest tests/ -q`。
+
 ```bash
 python -m focus_keeper.cli --config config.demo.yaml --source 0
 ```
