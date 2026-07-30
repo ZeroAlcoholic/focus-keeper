@@ -1,34 +1,59 @@
-Copyright (c) 2026. All rights reserved.
+focus-keeper — 實驗性展示版本
+EXPERIMENTAL / DEMONSTRATION RELEASE
 
-專有軟體授權（內部使用）
-PROPRIETARY — INTERNAL USE ONLY
+Copyright (c) 2026 ZeroAlcoholic. All rights reserved.
 
-本軟體及其原始碼為著作權人所有。未經著作權人事前書面同意，
-不得複製、修改、散布、公開傳輸、再授權、出售，或用於著作權人組織以外之目的。
+--------------------------------------------------------------------------
+這是什麼
+--------------------------------------------------------------------------
 
-授權範圍限於著作權人組織內部之評估、測試與使用。
+本專案為**實驗性展示版本**，用於技術驗證與內部評估。
+它不是產品，也未經生產環境驗證。
 
-本軟體按「現狀」提供，不附任何明示或默示之擔保，包括但不限於
-可商用性、特定用途適用性及未侵權之擔保。著作權人不對任何因使用
-或無法使用本軟體所生之損害負責。
+已知的能力界線（詳見 README）：
 
----
+  * 系統偵測的是「人臉」，不是「人」。PRIMARY_LEFT 的真實含意是
+    「主角臉部偵測不到」，不等於人離開了。
+  * 不做人臉辨識與身分比對，無法確認螢幕前是誰。
+  * 不量視線與注意力。
+  * 不具防偽能力：靜止照片會被判為「一人在場」。
 
-This software and its source code are the property of the copyright holder.
-No part may be copied, modified, distributed, publicly transmitted,
-sublicensed, sold, or used for any purpose outside the copyright holder's
-organization without prior written consent.
+**請勿**將本軟體作為任何控制、稽核、門禁或合規流程的依據。
 
-Permission is limited to evaluation, testing, and use within the copyright
-holder's organization.
+--------------------------------------------------------------------------
+使用條件
+--------------------------------------------------------------------------
+
+允許：為評估、學習與技術交流之目的，取得、閱讀、執行與修改本軟體。
+
+保留：著作權人保留一切權利。未經事前書面同意，不得將本軟體或其衍生
+      作品用於商業散布、再授權或出售。
+
+--------------------------------------------------------------------------
+免責聲明
+--------------------------------------------------------------------------
+
+本軟體按「現狀」提供，不附任何明示或默示之擔保，包括但不限於可商用性、
+特定用途適用性及未侵權之擔保。著作權人不對任何因使用或無法使用本軟體
+所生之損害負責。
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY.
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+DEALINGS IN THE SOFTWARE.
 
----
+--------------------------------------------------------------------------
+第三方元件
+--------------------------------------------------------------------------
 
-第三方元件不受本授權拘束，各依其原始授權條款：
-Third-party components are governed by their own licenses; see
-THIRD_PARTY_NOTICES.md.
+本授權不及於第三方元件，各依其原始授權條款：
+
+  OpenCV (opencv-python)  Apache-2.0
+  NumPy                   BSD-3-Clause
+  PyYAML                  MIT
+  YuNet ONNX 模型權重      MIT (opencv_zoo)
+
+詳見 THIRD_PARTY_NOTICES.md。
