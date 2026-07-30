@@ -1,0 +1,19 @@
+# 版本固定（規格 §9）：不得於執行時自動下載或升級未審核的相依。
+opencv-python==4.12.0.88
+numpy==2.2.6
+PyYAML==6.0.3
+
+# 開發／測試
+pytest==9.0.2
+
+# 路線 B（離線交叉驗證，選用）
+#
+# ⚠️ 絕對不要把 mediapipe 裝進這個環境。實測（2026-07-29 pip --dry-run）：
+#   - 所有版本都會連帶安裝 opencv-contrib-python，與上面釘住的 opencv-python
+#     搶同一個 cv2 套件名，裝下去兩邊都不可靠
+#   - mediapipe<=0.10.21 還要求 numpy<2，會把 numpy 2.2.6 降級到 1.26.4
+#
+# 請另建隔離環境（已實測可用，mediapipe 1.0.0 + cv2 5.0.0 + numpy 2.5.1）：
+#   python -m venv mpenv
+#   mpenv/Scripts/python -m pip install mediapipe==1.0.0 PyYAML==6.0.3
+#   mpenv/Scripts/python scripts/fetch_model.py --detector mediapipe

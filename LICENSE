@@ -1,0 +1,34 @@
+Copyright (c) 2026. All rights reserved.
+
+專有軟體授權（內部使用）
+PROPRIETARY — INTERNAL USE ONLY
+
+本軟體及其原始碼為著作權人所有。未經著作權人事前書面同意，
+不得複製、修改、散布、公開傳輸、再授權、出售，或用於著作權人組織以外之目的。
+
+授權範圍限於著作權人組織內部之評估、測試與使用。
+
+本軟體按「現狀」提供，不附任何明示或默示之擔保，包括但不限於
+可商用性、特定用途適用性及未侵權之擔保。著作權人不對任何因使用
+或無法使用本軟體所生之損害負責。
+
+---
+
+This software and its source code are the property of the copyright holder.
+No part may be copied, modified, distributed, publicly transmitted,
+sublicensed, sold, or used for any purpose outside the copyright holder's
+organization without prior written consent.
+
+Permission is limited to evaluation, testing, and use within the copyright
+holder's organization.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY.
+
+---
+
+第三方元件不受本授權拘束，各依其原始授權條款：
+Third-party components are governed by their own licenses; see
+THIRD_PARTY_NOTICES.md.

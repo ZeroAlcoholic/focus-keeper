@@ -1,0 +1,70 @@
+# DEMO 專用設定：只把時間門檻縮短，讓現場不用乾等。
+# 判定邏輯、偵測器、授權護欄與 config.yaml 完全相同。
+#
+# ⚠️ 這不是驗收設定。正式數字一律以 config.yaml 為準。
+#   （較短的門檻 = 較不容忍短暫漏偵測 = 誤報率會比 config.yaml 高）
+
+source: "0"
+detector: yunet
+event_log: logs/demo.jsonl
+
+pipeline:
+  inference_fps: 10
+  min_confidence: 0.70
+  min_face_area_ratio: 0.015
+
+detectors:
+  yunet:
+    model_path: models/face_detection_yunet_2023mar.onnx
+    sha256: "8f2383e4dd3cfbb4553ea8718107fc0423210dc964f9f4280604804ed2552fa4"
+    detect_width: 320
+    score_threshold: 0.50
+    nms_threshold: 0.30
+    top_k: 50
+  mediapipe:
+    model_path: models/blaze_face_short_range.tflite
+    sha256: ""
+    detect_width: 320
+    score_threshold: 0.50
+    nms_threshold: 0.30
+
+tracker:
+  iou_weight: 0.5
+  center_weight: 0.3
+  area_weight: 0.2
+  min_match_score: 0.35
+  max_center_shift_ratio: 0.25
+  max_area_ratio: 3.0
+  lost_after_ms: 2500          # 仍須 >= rules.primary_left_ms
+  smoothing: 0.35
+
+rules:
+  multi_person_hold_ms: 400        # 正式值 500
+  primary_missing_warn_ms: 700     # 正式值 1000
+  primary_left_ms: 1500            # 正式值 2000
+  primary_outside_roi_ms: 600      # 正式值 800
+  event_release_ms: 200
+  multi_person_min_count: 2
+  min_roi_overlap: 0.45
+
+  roi:                             # DEMO 時收窄一點，比較容易示範「偏離構圖」
+    x: 0.18
+    y: 0.02
+    w: 0.64
+    h: 0.96
+
+  shoulder_box:
+    left: 0.85
+    right: 0.85
+    top: 0.45
+    bottom: 1.60
+
+sources:
+  camera:
+    width: 1280
+    height: 720
+    fps: 30
+    backend: msmf                  # 實測開啟 641 ms，比 dshow 的 1314 ms 快一倍
+    warmup_timeout_s: 5.0
+  video:
+    pace_realtime: false

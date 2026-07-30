@@ -1,0 +1,10 @@
+# 統一換行為 LF，避免 Windows/Linux 之間反覆產生無意義的差異。
+* text=auto eol=lf
+
+# 二進位檔不得做換行轉換（會損毀檔案並使 SHA-256 驗證失敗）
+*.onnx  binary
+*.tflite binary
+*.png   binary
+*.jpg   binary
+*.avi   binary
+*.mp4   binary

@@ -1,0 +1,34 @@
+# 模型權重（規格 §9）
+# 只有「已審核且 SHA-256 已釘在 config.yaml」的權重才進 git。
+# YuNet: 232,589 bytes、MIT 授權可散布 -> 納入，讓離線環境 clone 後即可執行。
+# 其餘（含 MediaPipe .tflite）一律排除，須經 scripts/fetch_model.py 取得並驗雜湊。
+models/*
+!models/face_detection_yunet_2023mar.onnx
+*.tflite
+
+# 執行產物
+logs/
+media/
+*.jsonl
+report.json
+
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+
+# 編輯器
+.vscode/
+.idea/
+
+# 建置產物
+*.egg-info/
+build/
+dist/
+
+# PyInstaller 產出
+packaging/build/
+packaging/dist/

@@ -1,0 +1,117 @@
+# 即時主人物頭像監測 MVP 設定（規格 §4）
+#
+# 路線 A（預設）＝ OpenCV FaceDetectorYN + YuNet ONNX
+# 路線 B（備援）＝ MediaPipe BlazeFace Short Range（需另行安裝 mediapipe）
+# 路線 C（升級）＝ Darknet/YOLO 自訓 head 模型，本版不實作，僅保留 Detector 介面
+#
+# 授權要求（規格 §9）：套件與模型版本固定，執行時不得自動下載未審核權重。
+
+source: "0"                     # 攝影機 index 或影片路徑；可被 --source 覆寫
+detector: yunet                 # yunet | mediapipe
+event_log: logs/events.jsonl    # JSONL 事件記錄；--log none 可停用
+
+# --------------------------------------------------------------------------- #
+# 分析核心取樣與有效臉框門檻
+# --------------------------------------------------------------------------- #
+pipeline:
+  inference_fps: 10             # 目標推論頻率；延遲超標時第一順位下調
+
+  # --- 主角資格門檻：夠大夠清楚，才適合被追成主角 ---
+  min_confidence: 0.70          # 規格 update 版由 0.65 提高至 0.70
+  min_face_area_ratio: 0.015    # 臉框面積 / 影格面積 的下限
+
+  # --- 在場人數門檻：刻意較寬鬆 ---
+  # 產品語意是「畫面必須是單人主構圖」，所以只要畫面裡還有第二個人就該示警，
+  # 即使他站得較遠、臉較小、不足以當主角。與主角資格共用同一把尺會造成漏報。
+  # 設為 null 表示沿用主角門檻。不得比主角門檻更嚴格（會使主角不被計入人數）。
+  presence_min_confidence: 0.60
+  presence_min_face_area_ratio: 0.004
+
+  # --- 輕量化（實測校準，2026-07-29）---
+  # OpenCV 運算執行緒數。模型很小，1->8 條只快 1.4 倍（3.42 -> 2.45 ms），
+  # 擴展性極差。單執行緒只多約 1 ms，卻少 15 條執行緒與前景程式競爭；
+  # 10 FPS 需求下仍有 29 倍餘裕。0 = 不干預 OpenCV 預設。
+  opencv_threads: 1
+  # 停格縮圖邊長（用 INTER_NEAREST 取樣，成本 0.009 ms）
+  static_frame_thumb: 64
+  static_frame_diff: 0.02
+
+# --------------------------------------------------------------------------- #
+# 偵測器
+# --------------------------------------------------------------------------- #
+detectors:
+  yunet:
+    model_path: models/face_detection_yunet_2023mar.onnx
+    # opencv_zoo tag 4.10.0，232,589 bytes；不符即拒絕啟動
+    sha256: "8f2383e4dd3cfbb4553ea8718107fc0423210dc964f9f4280604804ed2552fa4"
+    detect_width: 320           # 送模型前的等比縮放寬度；延遲超標時可降到 256/192
+    score_threshold: 0.50       # 模型內部門檻，刻意寬鬆，最終取捨看 min_confidence
+    nms_threshold: 0.30
+    top_k: 50
+
+  # 路線 B 僅供離線交叉驗證，需另建隔離環境（見 requirements.txt 說明）。
+  # 權重不進版控；以 scripts/fetch_model.py --detector mediapipe 取得。
+  mediapipe:
+    model_path: models/blaze_face_short_range.tflite
+    # BlazeFace Short Range float16 /1/，229,746 bytes
+    sha256: "b4578f35940bf5a1a655214a1cce5cab13eba73c1297cd78e1a04c2380b0152f"
+    detect_width: 320
+    score_threshold: 0.50
+    nms_threshold: 0.30
+
+# --------------------------------------------------------------------------- #
+# 主角追蹤（不得每幀重新選主角）
+# --------------------------------------------------------------------------- #
+tracker:
+  iou_weight: 0.5
+  center_weight: 0.3
+  area_weight: 0.2
+  min_match_score: 0.35         # 綜合比對分數下限，低於此視為不同人
+  max_center_shift_ratio: 0.25  # 單次更新的中心位移上限（影格對角線倍數）
+  max_area_ratio: 3.0           # 單次更新的面積比上限
+  lost_after_ms: 3000           # 必須 >= rules.primary_left_ms，否則會在示警前換主角
+  smoothing: 0.35               # 主角框指數平滑；0 = 不平滑
+
+# --------------------------------------------------------------------------- #
+# 時間規則與構圖判定
+# --------------------------------------------------------------------------- #
+rules:
+  multi_person_hold_ms: 500
+  primary_missing_warn_ms: 1000
+  primary_left_ms: 2000
+  primary_outside_roi_ms: 800
+  event_release_ms: 200         # 條件解除後的遲滯，避免單幀誤偵測讓事件抖動
+
+  # 畫面停格偵測（0 = 停用）。
+  # 這是監測系統最危險的失效：USB 當掉／驅動凍結／虛擬攝影機停住時，
+  # 畫面不會變黑，而是停在最後一格；若那一格有人，系統會永遠回報 NORMAL，
+  # 監測早就死了卻毫無跡象。真人在鏡頭前必有微動與感測器雜訊，
+  # 連續數秒完全不變幾乎只會是來源本身停止更新。
+  feed_frozen_ms: 3000
+  multi_person_min_count: 2
+  min_roi_overlap: 0.45         # 肩上構圖框落在 ROI 內的最低面積比
+
+  roi:                          # 主要構圖區，正規化座標
+    x: 0.10
+    y: 0.02
+    w: 0.80
+    h: 0.96
+
+  shoulder_box:                 # 由臉框外擴推估，僅供 ROI 判斷與畫面標示
+    left: 0.85                  # 不宣稱為肩部模型偵測結果
+    right: 0.85
+    top: 0.45
+    bottom: 1.60
+
+# --------------------------------------------------------------------------- #
+# 影像來源
+# --------------------------------------------------------------------------- #
+sources:
+  camera:
+    width: 1280
+    height: 720
+    fps: 30
+    backend: auto               # auto | dshow | msmf | v4l2（Windows 建議 dshow）
+    warmup_timeout_s: 5.0
+  video:
+    pace_realtime: false        # true = 依影片時間軸節流播放，模擬即時
