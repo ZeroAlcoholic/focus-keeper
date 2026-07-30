@@ -28,8 +28,10 @@
 
 ## 快速開始
 
+完整安裝、使用與疑難排解：**[INSTALL.md](INSTALL.md)**
+
 ```bash
-pip install -e .          # 或 pip install -r requirements.txt
+pip install -e .          # 或下載 Releases 的獨立執行檔（不需 Python）
 
 # 取得模型權重並驗證 SHA-256（一次性；執行期不會自動下載）
 python scripts/fetch_model.py

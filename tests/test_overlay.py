@@ -7,6 +7,10 @@
 
 from __future__ import annotations
 
+import os
+import subprocess
+import sys
+
 import numpy as np
 import pytest
 from conftest import FRAME_H, FRAME_W, TimelineDetector, face
@@ -144,20 +148,39 @@ def test_hud_fits_inside_small_frames() -> None:
     assert canvas.shape == small.shape
 
 
+def _has_display() -> bool:
+    """此環境是否有可用的顯示。"""
+    if sys.platform in ("win32", "darwin"):
+        return True
+    return bool(os.environ.get("DISPLAY") or os.environ.get("WAYLAND_DISPLAY"))
+
+
+#: 在子行程裡探測 imshow 的腳本。
+_GUI_PROBE = (
+    "import cv2, numpy as np;"
+    "cv2.namedWindow('probe', cv2.WINDOW_NORMAL);"
+    "cv2.imshow('probe', np.zeros((32, 64, 3), np.uint8));"
+    "cv2.waitKey(1);"
+    "cv2.destroyAllWindows()"
+)
+
+
+@pytest.mark.skipif(not _has_display(), reason="無頭環境（無 DISPLAY／WAYLAND_DISPLAY）")
 def test_gui_backend_is_available() -> None:
-    """DEMO 會用到 imshow；若 OpenCV 沒帶 GUI backend 要在這裡就發現。"""
-    window = "focus_keeper_selftest"
-    try:
-        cv2.namedWindow(window, cv2.WINDOW_NORMAL)
-        cv2.imshow(window, np.zeros((32, 64, 3), np.uint8))
-        cv2.waitKey(1)
-    except cv2.error as exc:  # pragma: no cover - 無頭環境
-        pytest.skip(f"此環境無 GUI backend：{exc}")
-    finally:
-        try:
-            cv2.destroyAllWindows()
-        except cv2.error:
-            pass
+    """DEMO 會用到 imshow；若 OpenCV 沒帶 GUI backend 要在這裡就發現。
+
+    **必須在子行程執行。** 無顯示的 Linux 上 `cv2.imshow` 不是拋 `cv2.error`，
+    而是直接 `abort()` 讓整個行程 core dump——`except cv2.error` 攔不到，
+    會把整組測試一起帶走（GitHub Actions ubuntu runner 實測 exit 134）。
+    """
+    proc = subprocess.run(
+        [sys.executable, "-c", _GUI_PROBE], capture_output=True, timeout=60
+    )
+    if proc.returncode != 0:
+        pytest.skip(
+            f"此環境無法建立 GUI 視窗（returncode={proc.returncode}）："
+            f"{proc.stderr.decode(errors='replace')[-300:]}"
+        )
 
 
 class TestBoxDrawing:

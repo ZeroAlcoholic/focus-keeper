@@ -18,9 +18,14 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python }}
+      - name: Install OS deps (Linux)
+        if: runner.os == 'Linux'
+        # opencv-python（非 headless）在 Ubuntu 需要 libGL 才能 import
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq libgl1 libglib2.0-0
+
       - name: Install
         run: pip install -e ".[dev]"
       - name: Tests
         # 模型權重已隨倉庫提供（MIT，232 KB），因此需要真實推論的測試也會執行。
         # 無 GUI 的 CI 環境會自動 skip imshow 相關測試。
-        run: pytest tests/ -q
+        run: pytest tests/ -q -rs
